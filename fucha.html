@@ -1,0 +1,280 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); 
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitácora de Soren Lin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: url('https://imgur.com/AE6U3Ny.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .image-card {
+      position: relative;
+      width: 200px;
+      height: 250px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .image-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
+    }
+    .image-card::after {
+      content: attr(data-title);
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      width: 80%;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-image {
+      width: 150px;
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      margin: 0 auto 15px;
+      border: 2px solid #fff;
+    }
+    .modal-text {
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      color: #fff;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .close-btn:hover {
+      color: #ff4757;
+    }
+    .audio-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 50;
+    }
+
+    
+  </style>
+</head>
+<body class="bg-gray-900">
+  <h1 class="text-4xl font-bold mt-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-cyan-500">Dias pasajeros</h1>
+  
+  <div class="grid-container">
+    <div class="image-card" data-title="Infancia" data-id="childhood" style="background-image: url('');"></div>
+    <div class="image-card" data-title="Tragedia en Kaohsiung" data-id="tragedy" style="background-image: url('');"></div>
+    <div class="image-card" data-title="Vida en Helsinki" data-id="helsinki" style="background-image: url('');"></div>
+    <div class="image-card" data-title="Regreso a Taipéi" data-id="taipei" style="background-image: url('');"></div>
+    <div class="image-card" data-title="Información de Soren" data-id="info" style="background-image: url('');"></div>
+  </div>
+
+  <div id="modal-childhood" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <div class="modal-image" style="background-image: url('https://cdn-images.dzcdn.net/images/cover/deb350a4812f18ab270e3d7bf43de31f/1900x1900-000000-80-0-0.jpg');"></div>
+      <div class="modal-text">Soren Lin nació en 2022 en Taipéi, Taiwán, hijo de Wei Lin, un restaurador de arte que veía historias en cada pincelada, y Aino Kivinen, una poetisa finlandesa que escribía sobre los susurros del viento y los espíritus que habitan los objetos cotidianos. Sus padres le enseñaron a apreciar las cosas pequeñas: Wei le mostraba cómo un arañazo en un jarrón podía ser un poema, mientras que Aino le narraba cuentos sobre estrellas que cantaban y sombras que soñaban. Soren creció buscando belleza en los detalles: el crujido de las hojas en un mercado nocturno, el reflejo de un neón en un charco, o el aroma de un “bubble tea” recién hecho. Desde los 6 años, notaba algo extraño: en lugares concurridos, como mercados o tiendas de antigüedades, sentía emociones que no eran suyas: tristeza, anhelo, o una calidez inexplicable. A los 10 años, en un mercadillo nocturno, tocó un colgante antiguo y vio un destello de una figura borrosa que parecía mirarlo. Asustado, lo ignoró, pensando que era su imaginación.</div>
+    </div>
+   
+  </div>
+  <div id="modal-tragedy" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <div class="modal-image" style="background-image: url('https://imgur.com/NyYlFyb.jpg');"></div>
+      <div class="modal-text">A los 17 años, la vida de Soren se rompió en pedazos. Sus padres, apasionados por preservar el arte y la cultura, fueron invitados a una exposición privada en un almacén portuario abandonado en Kaohsiung, un lugar con rumores de extrañas desapariciones. Soren, que los acompañó, se quedó fuera, distraído por un espectáculo de luces callejeras que iluminaba el muelle. Durante la exposición, una explosión silenciosa sin fuego ni estruendo, pero con una onda de energía que estremeció el aire destruyó el almacén, matando a todos los presentes, incluidos Wei y Aino. Soren, a pocos metros de distancia, fue derribado por una fuerza invisible y escuchó una voz que susurró, "ئەو نزیکە.". Cuando despertó, estaba ileso, rodeado de escombros y un frío sobrenatural. Las autoridades atribuyeron la explosión a un fallo estructural, pero Soren sabía que algo no encajaba. El silencio de la explosión y la voz que lo salvó lo dejaron con una culpa abrumadora. ¿Por qué no entró con sus padres? ¿Podría haberlos salvado si hubiera estado a su lado? Devastado, Soren se tiñó el cabello de rosa, el color favorito de su madre, como una promesa de encontrar la "chispa" que ella siempre buscaba en sus poemas, un acto de desafío contra el vacío que sentía y un homenaje a sus padres.</div>
+    </div>
+  </div>
+  <div id="modal-helsinki" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <div class="modal-image" style="background-image: url('https://imgur.com/zGUPojD.jpg');"></div>
+      <div class="modal-text">Tras la tragedia, Soren fue enviado a Helsinki, Finlandia, a vivir con su tía materna, Elsa Kivinen, una bibliotecaria viuda que intentó darle estabilidad. Helsinki, con su frío implacable, amplifica la sensación de grisura de Soren. Su cabello rosa y su estilo femboy, que adoptó para mantener viva la memoria de sus padres, atrajeron críticas en la universidad, donde compañeros y profesores esperaban que fuera más "serio" o "masculino". Soren respondió abrazando aún más su estilo, usando su chaqueta roja y accesorios brillantes como un escudo contra el mundo. En Helsinki, estudió Diseño Gráfico en la Universidad Aalto, graduándose a los 22 años con un portafolio lleno de ilustraciones vibrantes inspiradas en los videojuegos y los poemas de su madre. Durante su tiempo en la universidad, Soren también trabajó a medio tiempo como ilustrador freelance, creando portadas para fanzines locales y diseños para eventos de cosplay, lo que le dio un círculo de conocidos en la escena artística de Helsinki. Entre ellos estaban Jiro Tanaka, un DJ japonés que lo animó a ser más extrovertido, y Lina Berg, una cosplayer finlandesa que admiraba su creatividad pero a veces le daba un sopapo. Sin embargo, su amiga más cercana seguía siendo Mira Niemi, una estudiante de informática sarcástica pero leal que lo conoció en un club de videojuegos y le regaló un llavero de Chrono Trigger, iniciando su pasatiempo de coleccionar llaveros de videojuegos retro.</div>
+    </div>
+  </div>
+  <div id="modal-taipei" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <div class="modal-image" style="background-image: url('https://imgur.com/AqL1v6u.jpg');"></div>
+      <div class="modal-text">A los 22 años, Soren regresó a Taipéi, buscando reconectar con las memorias de sus parents. Además de trabajar en un arcade, donde su carisma lo hacía popular, comenzó a colaborar con un colectivo de artistas callejeros, pintando murales en callejones de Taipéi que combinaban elementos de arte taiwanés y mitología nórdica, un guiño a su herencia mixta. Entre sus conocidos en Taipéi estaban Chen Wei, un dueño de un puesto de comida que lo trataba como a un hijo, y Mei-Ling, una bailarina callejera que compartía su amor por la música pop japonesa. Sin embargo, las sensaciones extrañas que sentía de niño se intensificaron: tocando objetos antiguos, como una máquina de arcade vieja o un pincel en el taller de su padre, percibía emociones residuales tristeza, alegría, o desesperación sin entender por qué.</div>
+    </div>
+  </div>
+  <div id="modal-info" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <div class="modal-image" style="background-image: url('https://imgur.com/nSLRiy6.jpg');"></div>
+      <div class="modal-text">Nombre Completo: Soren Lin
+Apodo: Xiao, Rosado Mamón (así le dice Wei)
+Edad: 23 años
+Ocupación: Pagar renta
+Gustos: El mambo, coleccionar collares, el té de burbujas, el tracking hand
+Disgustos: El clima cálido, el poco tiempo
+Anima: ???</div>
+    </div>
+  </div>
+
+  <div class="audio-container">
+    <audio id="background-audio" loop volume="0.5">
+      <source src="https://file.garden/Y_KTUh4lvlrDqOcb/Event_125_bgm.ogg?v=1754107507920" type="audio/mpeg">
+      <source src="https://file.garden/Y_KTUh4lvlrDqOcb/Event_125_bgm.ogg?v=1754107507920" type="audio/ogg">
+      Tu navegador no soporta el elemento de audio.
+    </audio>
+    <div class="flex space-x-2">
+      <button id="play-btn" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded">Reproducir</button>
+      <button id="pause-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded hidden">Pausar</button>
+    </div>
+  </div>
+
+  <script>
+    const imageCards = document.querySelectorAll('.image-card');
+    const modals = document.querySelectorAll('.modal');
+    const closeButtons = document.querySelectorAll('.close-btn');
+    const audio = document.getElementById('background-audio');
+    const playBtn = document.getElementById('play-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+
+    imageCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const modalId = `modal-${card.dataset.id}`;
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'flex';
+      });
+    });
+
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.modal').style.display = 'none';
+      });
+    });
+
+    modals.forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+    });
+
+    playBtn.addEventListener('click', () => {
+      audio.play();
+      playBtn.classList.add('hidden');
+      pauseBtn.classList.remove('hidden');
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      audio.pause();
+      pauseBtn.classList.add('hidden');
+      playBtn.classList.remove('hidden');
+    });
+
+    
+  </script>
+</body>
+</html>
